@@ -10,23 +10,20 @@
 """
 
 import pandas as pd
-import numpy as np
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+from handwritten.KNNregressor import KNNregressor
 
 
 def data_preprocess():
     # https://lab.isaaclin.cn/nCoV/
     global data
-    data = pd.read_csv('DXYArea_onlynum.csv', sep=',', header='infer')
+    data = pd.read_csv('DXYArea_onlynum.csv')  # 自动把第一行作为列属性
     # 数据预处理
     data['city_zipCode'] = data['city_zipCode'].fillna('400000')
-
-    # data_inf = np.isinf(data)
-    # data[data_inf] = 0
-    # data_nan = np.isnan(data)
-    # data[data_nan] = 0
-    # data.to_csv("Area_fill.csv")
+    # 转换字符串为数值
+    data = data.astype(int)
+    # data.to_csv("Area_fill_int.csv")
 
 
 def data_split():
@@ -60,6 +57,14 @@ def test():
     y_test_predict = knn_regressor.predict(X_test)
 
 
+def knn_handwritten(k):
+    global knn_regressor_hand, y_train_predict_hand, y_test_predict_hand
+    knn_regressor_hand = KNNregressor(k=k)
+    knn_regressor_hand.fit(X_train=X_train, y_train=Y_train)
+    y_train_predict_hand = knn_regressor_hand.predict(X_train)
+    y_test_predict_hand = knn_regressor_hand.predict(X_test)
+
+
 def verify(pred, true):
     mean_err = mean_squared_error(y_true=true, y_pred=pred)
     mean_abs_err = mean_absolute_error(y_true=true, y_pred=pred)
@@ -71,10 +76,16 @@ def verify(pred, true):
 if __name__ == '__main__':
     data_preprocess()
     data_split()
-    train(10)
+    train(5)
     validate()
     test()
     print("训练集上预测结果：")
     verify(y_train_predict, Y_train)
     print("测试集上预测结果：")
     verify(y_test_predict, Y_test)
+
+    knn_handwritten(5)
+    print("训练集上预测结果（手写knn）：")
+    verify(y_train_predict_hand, Y_train)
+    print("测试集上预测结果（手写knn）：")
+    verify(y_test_predict_hand, Y_test)
