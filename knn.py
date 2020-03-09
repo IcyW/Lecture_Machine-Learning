@@ -10,6 +10,8 @@
 """
 
 import pandas as pd
+from datetime import datetime
+from sklearn.utils import shuffle
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from handwritten.KNNregressor import KNNregressor
@@ -18,20 +20,29 @@ from handwritten.KNNregressor import KNNregressor
 def data_preprocess():
     # https://lab.isaaclin.cn/nCoV/
     global data
-    data = pd.read_csv('DXYArea_onlynum.csv')  # 自动把第一行作为列属性
-    # 数据预处理
+    data = pd.read_csv('data/DXYArea_onlynum.csv')  # 自动把第一行作为列属性
+    # 填充空数据
     data['city_zipCode'] = data['city_zipCode'].fillna('400000')
     # 转换字符串为数值
     data = data.astype(int)
     # data.to_csv("Area_fill_int.csv")
 
 
+def shuffle_data():
+    global shuffled_data
+    # data = pd.read_csv('data/Area_fill_int.csv')
+    shuffled_data = shuffle(data)
+    shuffled_data.to_csv('data/Area_fill_shuffled.csv')
+
+
 def data_split():
-    data_rows_len = data.shape[0]
+    # shuffled_data = pd.read_csv('data/Area_fill_shuffled.csv')
+    data_rows_len = shuffled_data.shape[0]
     amount = int(0.9 * data_rows_len)
 
-    train_data = data.head(amount)
-    test_data = data.tail(data_rows_len - amount)
+    train_data = shuffled_data.head(amount)
+    test_data = shuffled_data.tail(data_rows_len - amount)
+    # test_data = data.tail(int(0.01 * (data_rows_len - amount)))
 
     global X_train, Y_train, X_test, Y_test
     X_train = train_data.iloc[:, 0:-1]
@@ -74,8 +85,12 @@ def verify(pred, true):
 
 
 if __name__ == '__main__':
+    # step1. 数据预处理
     data_preprocess()
+    shuffle_data()
     data_split()
+    # step2. knn调包
+    start = datetime.now()
     train(5)
     validate()
     test()
@@ -83,9 +98,15 @@ if __name__ == '__main__':
     verify(y_train_predict, Y_train)
     print("测试集上预测结果：")
     verify(y_test_predict, Y_test)
+    halt = datetime.now()
+    print("耗时：%0.1f 毫秒" % (halt - start).microseconds)
 
-    knn_handwritten(5)
-    print("训练集上预测结果（手写knn）：")
-    verify(y_train_predict_hand, Y_train)
-    print("测试集上预测结果（手写knn）：")
-    verify(y_test_predict_hand, Y_test)
+    # # step3. knn手写
+    # knn_handwritten(5)
+    # print("训练集上预测结果（手写knn）：")
+    # verify(y_train_predict_hand, Y_train)
+    # print("测试集上预测结果（手写knn）：")
+    # verify(y_test_predict_hand, Y_test)
+    #
+    # end = datetime.now()
+    # print("耗时：%f 秒" % (end - halt).seconds)
