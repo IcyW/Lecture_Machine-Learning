@@ -50,10 +50,7 @@ def binarize_data():
     # shuffled_data.to_csv('data/Area_fill_shuffled_binarized.csv')
 
 
-def data_split():
-    # final_data = pd.read_csv('data/Area_fill_shuffled.csv')
-    # final_data = pd.read_csv('data/Area_fill_shuffled_binarized.csv')
-    final_data = shuffled_data
+def data_split(final_data):
     data_rows_len = final_data.shape[0]
     train_amount = int(0.003 * data_rows_len)
     # test_amount = data_rows_len - train_amount
@@ -115,7 +112,7 @@ def regressor():
     # step1. 数据预处理
     data_preprocess()
     shuffle_data()
-    data_split()
+    data_split(shuffled_data)
     # step2. knn调包
     start = datetime.now()
     train(5)
@@ -144,12 +141,27 @@ def classifier():
     data_preprocess()
     shuffle_data()
     binarize_data()  # 二分类
-    data_split()
+    data_split(shuffled_data)
 
     # step3. knn手写
     knn_handwritten_classifier(5)
 
 
+def classifier_measure():
+    # *额外:用回归的概率结果做分类问题
+    # *省去预处理过程，直接从csv读取处理好的数据
+    shuffled_data = pd.read_csv('data/Area_fill_shuffled.csv')
+    data_split(shuffled_data)
+    knn_handwritten(5)  # 得到y_train_predict_hand，假设以回归的结果作为分类的依据
+
+    binarized_data = pd.read_csv('data/Area_fill_shuffled_binarized.csv')
+    data_split(binarized_data)  # 得到二分类的真实Y_train
+
+    plot_roc(Y_train, y_train_predict_hand)
+    plot_pr(Y_train, y_train_predict_hand)
+
+
 if __name__ == '__main__':
     # regressor()
-    classifier()
+    # classifier()
+    classifier_measure()
