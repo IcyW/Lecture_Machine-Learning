@@ -29,5 +29,6 @@ def plot_pr(y_true, y_scores):
     plt.title('P-R Curve')
     plt.xlabel('Recall')
     plt.ylabel('Precision')
+    plt.ylim([-0.02, 1.02])
     plt.plot(recall, precision)
     plt.show()
