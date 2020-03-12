@@ -53,7 +53,9 @@ class KNNregressor:
         distances = self._eu_distance(x)
 
         nearest = np.argsort(distances)
-        topK_y = [self._y_train[i] for i in nearest[:self._k]]
+        # shuffle后df.series格式的数据索引还是原样，求最近距离后索引会出错
+        np_y_train = np.array(self._y_train)
+        topK_y = [np_y_train[i] for i in nearest[:self._k]]
         # print("topK_y:", topK_y)
         return np.mean(topK_y)
 
