@@ -92,9 +92,9 @@ def binning_clustering():
     mean = c.rolling(2).mean()  # Size of the moving window
     # print(mean)
     w = mean.iloc[1:]  # 用滑动窗口求均值的方法求相邻两项求中点，作为边界点
-    # print("w", w)
-    w = [0] + list(w[0] + [attribute.max()])  # 把首末边界点加上
-    # print("w", w)
+    # print("w:")
+    w = [0] + list(w[0]) + [attribute.max()]  # 把首末边界点加上, 并转换为list格式
+    # print(w)
     data['province_confirmedCount_bin3'] = pd.cut(attribute, w)  # cut函数, labels=range(k-1)
     print(data['province_confirmedCount_bin3'].value_counts())
 
@@ -111,6 +111,15 @@ if __name__ == '__main__':
     # standardization()
     # normalization_a()
     # normalization_b()
-    binning_equal_freq()
-    binning_equal_interval()
+    # binning_equal_freq()
+    # binning_equal_interval()
     binning_clustering()
+
+
+
+
+
+
+
+
+
